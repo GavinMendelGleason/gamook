@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>World Builder</title>
+{{meta | safe}}
+</head>
+
+<body>
+<div class="page">
+  <div id="status"></div>
+  <span class="column">
+    <h1>Place Creation</h1>
+    <form>
+      <h2>Place Name</h2>
+      {% if place is defined %}
+        <input id="place-id" type="hidden" value="{{place.pid}}"/>
+        <input id="place-title" class="entry" value="{{place.title}}" />             <div>
+          <h2>Your introduction goes here.</h2>
+          <textarea id="introduction" class="entry text ui-widget-content ui-corner-all" rows="4">{{place.content}}</textarea>
+        </div>
+      {% else %} 
+        <input id="place-title" class="entry" />
+        <div>
+          <h2>Your introduction goes here.</h2>
+          <textarea id="introduction" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea>
+        </div>
+      {% endif %}
+      {% if world is defined %}
+      <div>
+        <h2>Enter transitions to new worlds here.</h2>
+        <table id="destination-table" class="destination">
+         <tr><th>Predicate</th><th>State Transitions</th><th>Destination</th></tr>
+         <tr><td><textarea id="predicate" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea></td> <td><textarea id="transition-function" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea> </td> <td> <input id="destination" /> <input id="destination-id" type="hidden" value="-1" /> </td>  <td><button id="add-button">Add</button></td></tr>
+        </table>
+      </div>
+      {% endif %}
+      <div class="submit-container"><button id="submit-button" value="Submit">Submit</button></div>
+    </form>
+  </span>
+  <span class="column"> 
+    <ul class="sidebar ui-widget-content ui-corner-all">
+      <li>
+        <div id="places" class="ui-widget">
+          <h1>Places</h1>
+          <ul id="places-list" class="ui-widget-content ui-corner-all"></ul>
+        </div>
+      </li>
+      <li>
+        <div id="world" class="ui-widget">
+          <h1>World</h1>
+          <h2>World name</h2>
+          <input id="worldname" class="entry text ui-widget-content ui-corner-all" value="{{world.title}}"/>
+          <h2>Initial state</h2>
+          <textarea id="initial-state" class="entry text ui-widget-content ui-corner-all" rows="4">{{world.state}}</textarea>
+        </div>
+      </li>
+    </ul>
+  </span>
+</div>
+
+<script type="text/javascript">
+
+  function loadPlace(pid){ 
+      ajs = { 
+          type : 'GET',
+          url : 'http://{{server_root}}/place',
+          dataType: "json",
+          success : function(data){
+              showStatus('Place loaded');
+          }, 
+          error : function(x,e){
+              showError("Loading Failed: " + x.status + " " + x.responseText);
+          }
+      }
+      $.ajax(ajs);    
+  }
+
+  function showError(s){ 
+      $('#status').html('<div style="color:red;">'+ s +'</div>');
+  }
+  
+  function showStatus(s){
+      $('#status').html('<div style="bgcolor:green;">' + s + '</div>');
+  }
+  
+  function getPlaces(){ 
+      ajs = { 
+          type : 'GET', 
+          url : 'http://{{server_root}}/places',
+          data : { wid : {{world.wid}}},
+          dataType: "json",
+          success : function(places){
+              for(var i = 0; i < places.length ; i++){ 
+                  var pid = (places[i]).id;
+                  var title = (places[i]).title;
+                  $('#places-list').append('<li><a href="javascript:loadPlace('+pid +')">'+ pid.toString() +'.</a> <a href="javascript:loadPlace('+ pid +')">'+title+'</a></li>');
+              }
+          }, 
+          error : function(x,e){
+              showError("Loading Failed" + x.status + " " + x.responseText);
+          }
+      }
+      $.ajax(ajs);
+  }
+  
+  function storePlace(place){
+      ajs = { 
+          type : 'POST',
+          url : 'http://{{server_root}}/place',
+          data : place,
+          success : function(data){
+              showStatus('Place updated');
+          }, 
+          error : function(x,e){
+              showError("Updating Failed: " + x.status + " " + x.responseText);
+          }
+      }
+      $.ajax(ajs);    
+  }
+  
+  
+  function uiTransition(){
+      result = [];
+      var predicate = $("#predicate").html();
+      var transition = $("#transition-function").html();
+      var destination = $("#destination").html();
+      var destination_id = $("#destination-id").html();
+      return {predicate : predicate, 
+              transition : transition, 
+              destination : destination,
+              destination_id : destination_id}
+  }
+
+  $(document).ready(function() {
+
+      getPlaces();
+      
+      $('#add-button').button();
+      $('#add-button').bind('click',function(e){
+          // Don't actually submit
+          e.preventDefault();
+          transition = uiTransitions();
+          
+      }); 
+
+      $('#submit-button').button();
+      $('#submit-button').bind('click',function (e){ 
+          // Don't actually submit
+          e.preventDefault();
+          
+          var title = $('#place-title').val();
+          if(title == ''){ 
+              alert('Insufficiently long place name.')
+              return
+          }
+          introduction = $('#introduction').val();
+          pid = $('#place-id').val();
+          
+          place = { pid : pid, 
+                    title : title,
+                    introduction : introduction};
+          
+          storePlace(place);
+      }); 
+
+      $('#destination').bind("keydown", function(e) {
+          var destination = $("#destination").html();
+          
+      }); 
+
+  });
+
+</script>
+</body>
+</html>

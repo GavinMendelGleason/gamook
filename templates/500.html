@@ -1,0 +1,15 @@
+<style type="text/css">
+.error-message {  
+}
+</style>
+<div>
+  <h1>You have found a rip in the space time continuum</h1>
+  <h2>In order to go forward, you'll have to go back.</h2>
+</div>
+<div> 
+  {% if error_string is defined %}
+    <div class="error-message">{{ error_string }}</div>
+  {% else %}
+    <div class="error-message">The server exploded for no reason</div>
+  {% endif  %}
+</div>

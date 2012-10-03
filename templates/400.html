@@ -1,0 +1,14 @@
+<style type="text/css">
+.error-message {  
+}
+</style>
+<div>
+  <h1>Your incantation was completely wrong. You turn into a frog.</h1>
+</div>
+<div> 
+  {% if error_string is defined %}
+    <div class="error-message">{{ error_string }}</div>
+  {% else %}
+    <div class="error-message">Nothing to be done about that I suppose...</div>
+  {% endif  %}
+</div>

@@ -1,0 +1,54 @@
+/*
+Author: Gavin Mendel-Gleason
+Description: CSS for Gamook
+-------------------------------------------------------------- */
+
+body
+{
+  background-color: #1C94C4;
+  font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+  font-size: 1.1em;
+}
+
+label, input { display:block; }
+
+input.text { margin-bottom:12px; width:95%; padding: .4em; }
+
+fieldset { padding:0; border:0; margin-top:25px; }
+
+h1 { font-size: 2.2em; margin: .6em 0; }
+
+.world_page {          
+    width: 50%;
+    margin: 0px auto;
+} 
+
+.sidebar {  
+    padding: 0px 35px 35px 35px;
+}
+
+.ui-dialog .ui-state-error { padding: .3em; }
+
+.validateTips { border: 1px solid transparent; padding: 0.3em; }
+
+.column {  
+    display: inline-block;
+    vertical-align: top;
+    padding: 5px;
+}
+  
+.destination td {
+    vertical-align: top;
+}
+  
+.entry {  
+    width: 100%;
+}
+
+.submit-container {  
+   padding: 5px;
+}
+
+.submit-container button {  
+   float: right;
+}

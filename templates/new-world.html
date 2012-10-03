@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>New World</title>
+{{meta | safe}}
+</head>
+
+<body>
+  <div class="world_page">
+    <div id="status"></div>
+    <div class="column">
+    <h1>New World</h1>
+    <form>
+      <fieldset>
+        <div>
+          <label for="world_text">World Name</label>
+          <input id="world_name" name="world_name" class="text ui-widget-content ui-corner-all" />
+        </div>
+        <div>
+          <label for="initial_state">Initial Values</label>
+          <textarea id="initial_state" name="initial_state" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea>
+        </div>
+      </fieldset>
+      <div class="submit-container"><button id="submit-button" value="Submit">Submit</button></div>
+    </form>
+    </div>
+  </div>
+</body> 
+
+</html>
+<script type="text/javascript">
+$(document).ready(function (){
+    function showError(s){ 
+        $('#status').html('<div style="color:red;">'+ s +'</div>');
+    }
+    
+    $('#submit-button').button();
+    $('#submit-button').bind('click',function (e){ 
+        e.preventDefault();        
+        // Do some validation prior to submitting
+        if ($('#world_name').val().length < 3){ 
+            alert('Insufficient length for world name');            
+        }else{        
+            ajs = { 
+                type : 'POST',
+                url : 'http://{{server_root}}/builder',
+                data : { world_name : $('#world_name').val(),
+                         initial_state : $('#initial_state').val() }, 
+                dataType: "json",
+                success : function(pid){
+                    window.location.href = 'http://{{server_root}}/builder?pid='+pid;
+                }, 
+                error : function(x,e){
+                    showError("Saving world Failed: " + x.status + " " + x.responseText);
+                }
+            }
+            $.ajax(ajs);    
+        }
+
+    }); 
+});
+</script>
