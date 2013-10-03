@@ -8,66 +8,92 @@
 
 <body>
 <div class="page">
-  <div id="status"></div>
+  <div id="status" class="ui-corner-all"></div>
   <span class="column">
-    <h1>Place Creation</h1>
-    <form>
-      <h2>Place Name</h2>
-      {% if place is defined %}
-        <input id="place-id" type="hidden" value="{{place.pid}}"/>
-        <input id="place-title" class="entry" value="{{place.title}}" />             <div>
-          <h2>Your introduction goes here.</h2>
-          <textarea id="introduction" class="entry text ui-widget-content ui-corner-all" rows="4">{{place.content}}</textarea>
-        </div>
-      {% else %} 
-        <input id="place-title" class="entry" />
-        <div>
-          <h2>Your introduction goes here.</h2>
-          <textarea id="introduction" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea>
-        </div>
-      {% endif %}
-      {% if world is defined %}
-      <div>
-        <h2>Enter transitions to new worlds here.</h2>
-        <table id="destination-table" class="destination">
-         <tr><th>Predicate</th><th>State Transitions</th><th>Destination</th></tr>
-         <tr><td><textarea id="predicate" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea></td> <td><textarea id="transition-function" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea> </td> <td> <input id="destination" /> <input id="destination-id" type="hidden" value="-1" /> </td>  <td><button id="add-button">Add</button></td></tr>
-        </table>
+    <div class="widget-container">
+      <div class="widget-header ui-widget-header ui-corner-top"> 
+        Place Creation</div>
+      <div class="widget ui-widget ui-corner-bottom">
+        <form>
+          <input id="place-id" type="hidden" value="{{place.pid}}"/>
+          <fieldset class="entry-form">
+            <label for="place-title">Place Name</label>
+            <input id="place-title" class="entry text ui-widget-content ui-corner-all" value="{{place.title}}" />
+            <label for="place-content">Introduction</label>
+            <textarea id="introduction" class="entry text ui-widget-content ui-corner-all" rows="4">{{place.content}}</textarea>        
+          </fieldset>
+          <div class="submit-container">
+            <button id="submit-button" value="Submit">Submit</button>
+          </div>
+        </form>
       </div>
-      {% endif %}
-      <div class="submit-container"><button id="submit-button" value="Submit">Submit</button></div>
-    </form>
+    </div>
+    <div class="widget-container">
+      <div class="widget-header ui-widget-header ui-corner-top">Transitions</div>
+      <div class="widget ui-widget ui-corner-bottom">
+        <form>    
+          <table id="transition-table" class="transition">            
+            <tr><th>Description</th><th>Predicate</th><th>State Transitions</th><th>Destination</th></tr>
+            <tr><td><textarea id="description" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea></td>
+                <td><textarea id="predicate" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea></td> 
+                <td><textarea id="effects" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea> </td> 
+                <td><textarea id="destination" class="entry text ui-widget-content ui-corner-all" rows="4"></textarea> 
+                    <input id="destination-id" type="hidden" value="-1" /> </td> 
+                <td><button id="add-transition">Add</button></td></tr>
+          </table>
+        </form>
+      </div>
+    </div>
   </span>
   <span class="column"> 
-    <ul class="sidebar ui-widget-content ui-corner-all">
-      <li>
-        <div id="places" class="ui-widget">
-          <h1>Places</h1>
-          <ul id="places-list" class="ui-widget-content ui-corner-all"></ul>
+    <div id="places" class="widget-container">
+      <div class="widget-header ui-widget-header ui-corner-top">Places</div>
+      <div class="widget-content ui-widget-content ui-corner-bottom">
+        <ul id="places-list"></ul>
+        <div class="submit-container">
+          <button id="add-place" class="ui-widget-content ui-corner-all">New Place</button>
+          <button id="delete-place" class="ui-widget-content ui-corner-all">Delete</button>
         </div>
-      </li>
-      <li>
-        <div id="world" class="ui-widget">
-          <h1>World</h1>
-          <h2>World name</h2>
-          <input id="worldname" class="entry text ui-widget-content ui-corner-all" value="{{world.title}}"/>
-          <h2>Initial state</h2>
+      </div>
+    </div>
+    <div id="world" class="widget-container">
+      <div class="widget-header ui-widget-header ui-corner-top">World</div>
+      <div class="widget-content ui-widget-content ui-corner-bottom">
+        <fieldset>
+          <label for="world-name">World Name</label>
+          <input id="world-name" class="entry text ui-widget-content ui-corner-all" value="{{world.title}}"/>
+          <label for="initial-state">Initial state</label>
           <textarea id="initial-state" class="entry text ui-widget-content ui-corner-all" rows="4">{{world.state}}</textarea>
-        </div>
-      </li>
-    </ul>
+        </fieldset>
+        <div class="submit-container"><button id="update-world" class="ui-widget-content ui-corner-all">Update World</button></div>
+      </div>      
+    </div>
   </span>
 </div>
+
+<div id="delete-place-dialog">
+  <div><h2 id="delete-place-message"></h2></div>
+  <div class="buttons-div">
+    <span align="right"><button id="delete-place-button">Delete</button></span><span><button id="cancel-delete-place">Cancel</button></span>
+  </div>
+</div>
+
+</body>
 
 <script type="text/javascript">
 
   function loadPlace(pid){ 
-      ajs = { 
+      var ajs = { 
           type : 'GET',
-          url : 'http://{{server_root}}/place',
+          url : 'http://{{server_root}}/api/place',
+          data : {pid : pid},
           dataType: "json",
-          success : function(data){
-              showStatus('Place loaded');
+          success : function(place){
+              $('#introduction').val(place.introduction);
+              $('#place-title').val(place.title); 
+              $('#place-id').val(place.pid);
+              getTransitions();
+              //showStatus('Place loaded');
           }, 
           error : function(x,e){
               showError("Loading Failed: " + x.status + " " + x.responseText);
@@ -76,73 +102,346 @@
       $.ajax(ajs);    
   }
 
-  function showError(s){ 
-      $('#status').html('<div style="color:red;">'+ s +'</div>');
-  }
-  
-  function showStatus(s){
-      $('#status').html('<div style="bgcolor:green;">' + s + '</div>');
-  }
-  
   function getPlaces(){ 
-      ajs = { 
+      var ajs = { 
           type : 'GET', 
-          url : 'http://{{server_root}}/places',
+          url : 'http://{{server_root}}/api/places',
           data : { wid : {{world.wid}}},
           dataType: "json",
           success : function(places){
+              $('#places-list').empty();
               for(var i = 0; i < places.length ; i++){ 
-                  var pid = (places[i]).id;
+                  var pid = (places[i]).pid;
                   var title = (places[i]).title;
                   $('#places-list').append('<li><a href="javascript:loadPlace('+pid +')">'+ pid.toString() +'.</a> <a href="javascript:loadPlace('+ pid +')">'+title+'</a></li>');
               }
           }, 
-          error : function(x,e){
-              showError("Loading Failed" + x.status + " " + x.responseText);
-          }
+          error : ajaxError
       }
       $.ajax(ajs);
   }
   
-  function storePlace(place){
-      ajs = { 
+  function storePlace(place, success, fail){
+      if(!success){ 
+          var success = function(data){ showStatus('Place updated'); };
+      }
+      if(!fail){
+          var fail = ajaxError;
+      }
+      var ajs = {
           type : 'POST',
-          url : 'http://{{server_root}}/place',
+          url : 'http://{{server_root}}/api/place',
           data : place,
-          success : function(data){
-              showStatus('Place updated');
-          }, 
-          error : function(x,e){
-              showError("Updating Failed: " + x.status + " " + x.responseText);
-          }
+          success : success, 
+          error : fail
       }
       $.ajax(ajs);    
   }
   
   
   function uiTransition(){
-      result = [];
-      var predicate = $("#predicate").html();
-      var transition = $("#transition-function").html();
-      var destination = $("#destination").html();
-      var destination_id = $("#destination-id").html();
-      return {predicate : predicate, 
-              transition : transition, 
+      var result = [];
+      var description = $('#description').val();
+      var predicate = $("#predicate").val();
+      var effects = $("#effects").val();
+      var destination = $("#destination").val();
+      var destination_id = $("#destination-id").val();
+      var source_id = $('#place-id').val();
+      return {source_id : source_id,
+              predicate : predicate, 
+              effects : effects,
+              wid : {{world.wid}},
               destination : destination,
+              description : description,
               destination_id : destination_id}
+  }
+
+  function getTransitions(){
+      var pid = $('#place-id').val(); 
+      var ajs = { 
+          type : 'GET', 
+          url : 'http://{{server_root}}/api/transitions',
+          data : { pid : pid },
+          dataType: "json",
+          success : function(transitions){
+              $('#transition-table').find("tr:gt(1)").remove();
+              for(var i = 0; i < transitions.length ; i++){ 
+                  var edge_id = (transitions[i]).edge_id;
+                  var description = (transitions[i]).description;
+                  var predicate = (transitions[i]).predicate;
+                  var effects = (transitions[i]).effects;
+                  var destination = (transitions[i]).destination;
+                  var destination_id = (transitions[i]).destination_id;
+
+                  $('#transition-table').append(
+                      '<tr class="transition-row" id="transition-id-'+edge_id+'">\
+                         <td><textarea style="display:none;" id="description-edit-'+edge_id+'" class="entry text ui-widget-content ui-corner-all" rows="4">'+description+'</textarea>\
+                             <p id="description-'+edge_id+'">'+description+'</p></td>\
+                         <td><textarea style="display:none;" id="predicate-edit-'+edge_id+'" class="entry text ui-widget-content ui-corner-all" rows="4">'+predicate+'</textarea>\
+                             <pre id="predicate-'+edge_id+'">'+predicate+'</pre></td>\
+                         <td><textarea style="display:none;" id="effects-edit-'+edge_id+'" class="entry text ui-widget-content ui-corner-all" rows="4">'+effects+'</textarea>\
+                             <pre id="effects-'+edge_id+'">'+ effects +'</pre></td>\
+                         <td><textarea style="display:none;" id="destination-edit-'+edge_id+'" class="entry text ui-widget-content ui-corner-all" rows="4">'+destination_id+'. '+destination+'</textarea>\
+                             <p id="destination-'+edge_id+'">'+destination_id+'. '+destination+'</p></td>\
+                         <td><button id="edit-transition-'+ edge_id+'">Edit</button>\
+                             <button style="display:none;" id="update-transition-'+ edge_id+'">Update</button><br/>\
+                             <button style="display:none;" id="cancel-transition-'+ edge_id+'">Cancel</button>\
+                             <button id="delete-transition-'+ edge_id+'">Delete</button></td>\
+                       </tr>');
+                  addTransitionButtons(edge_id);
+              }
+          }, 
+          error : ajaxError
+      }
+      $.ajax(ajs);
+  }
+
+  function deleteTransition(edge_id){ 
+      var ajs = {
+          type : 'DELETE',
+          url : 'http://{{server_root}}/api/transition?edge_id=' +edge_id ,
+          success : function (data){
+              $('#transition-id-'+edge_id).remove();          
+          }, 
+          error : ajaxError
+      }
+      $.ajax(ajs);    
+  }
+
+  function deleteTransitionRow(edge_id){
+      var closure = function (e){
+          e.preventDefault();
+          deleteTransition(edge_id); 
+      }
+      return closure;
+  }
+
+  function editTransitionRow(edge_id){
+      var closure = function (e){
+          e.preventDefault();
+          // Hide static.
+          $('#description-'+edge_id).hide(); 
+          $('#predicate-'+edge_id).hide(); 
+          $('#effects-'+edge_id).hide(); 
+          $('#destination-'+edge_id).hide(); 
+          // Unhide dynamic.
+          $('#description-edit-'+edge_id).show(); 
+          $('#predicate-edit-'+edge_id).show(); 
+          $('#effects-edit-'+edge_id).show(); 
+          $('#destination-edit-'+edge_id).show(); 
+          // Hide delete / edit 
+          $('#delete-transition-'+ edge_id).hide();
+          $('#edit-transition-'+ edge_id).hide();
+          // Unhide update / cancel
+          $('#update-transition-'+ edge_id).show();
+          $('#cancel-transition-'+ edge_id).show();
+      }
+      return closure;
+  }
+
+  function updateTransition(transition,k){ 
+      var ajs = {
+          type : 'PUT',
+          url : 'http://{{server_root}}/api/transition',
+          data : transition,
+          dataType: "json",
+          success : function (data){
+              //getTransitions();
+              showStatus('Transition updated');
+              k(data);
+          }, 
+          error : ajaxError
+      }
+      $.ajax(ajs);    
+  }
+
+  function updateTransitionRow(edge_id){ 
+      var closure = function (e){ 
+          e.preventDefault();
+          var description = $('#description-edit-'+edge_id).val(); 
+          var predicate = $('#predicate-edit-'+edge_id).val(); 
+          var effects = $('#effects-edit-'+edge_id).val(); 
+          var destination = $('#destination-edit-'+edge_id).val(); 
+          var source_id = $('#place-id').val();
+          var transition = { 
+              edge_id : edge_id, 
+              predicate : predicate, 
+              description : description,
+              effects : effects, 
+              wid : {{world.wid}},
+              destination : destination,
+              destination_id : '-1', // Bad destination_id forces attempt to guess one. 
+              source_id : source_id
+          }
+          
+          var kont = function (data){              
+              // Unhide static
+              $('#description-'+edge_id).show(); 
+              $('#predicate-'+edge_id).show(); 
+              $('#effects-'+edge_id).show(); 
+              $('#destination-'+edge_id).show(); 
+
+              // set static
+              $('#description-'+edge_id).html(description); // Why html and not val?
+              $('#predicate-'+edge_id).html(predicate); // Why html and not val?
+              $('#effects-'+edge_id).html(effects);
+              $('#destination-'+edge_id).html(data[1] + '. ' + data[0]); 
+
+              // Hide dynamic.
+              $('#description-edit-'+edge_id).hide(); 
+              $('#predicate-edit-'+edge_id).hide(); 
+              $('#effects-edit-'+edge_id).hide(); 
+              $('#destination-edit-'+edge_id).hide(); 
+              // Unhide delete / edit 
+              $('#delete-transition-'+ edge_id).show();
+              $('#edit-transition-'+ edge_id).show();
+              // Hide update / cancel
+              $('#update-transition-'+ edge_id).hide();              
+              $('#cancel-transition-'+ edge_id).hide();
+          }
+          updateTransition(transition,kont); 
+      }
+      return closure;
+  }
+
+  function addTransitionButtons(edge_id){
+      $('#delete-transition-'+edge_id).button();
+      $('#delete-transition-'+edge_id).bind('click',deleteTransitionRow(edge_id));
+      $('#edit-transition-'+edge_id).button();
+      $('#edit-transition-'+edge_id).bind('click',editTransitionRow(edge_id));
+      $('#update-transition-'+edge_id).button();
+      $('#update-transition-'+edge_id).bind('click',updateTransitionRow(edge_id));
+      $('#cancel-transition-'+edge_id).button();
+      $('#cancel-transition-'+edge_id).bind('click',cancelTransitionRow(edge_id));
+  }
+
+  function cancelTransitionRow(edge_id){ 
+      var kont = function (){
+          // Unhide static
+          $('#description-'+edge_id).show(); 
+          $('#predicate-'+edge_id).show(); 
+          $('#effects-'+edge_id).show(); 
+          $('#destination-'+edge_id).show(); 
+          // Hide dynamic.
+          $('#description-edit-'+edge_id).hide(); 
+          $('#predicate-edit-'+edge_id).hide(); 
+          $('#effects-edit-'+edge_id).hide(); 
+          $('#destination-edit-'+edge_id).hide(); 
+          // Unhide delete / edit 
+          $('#delete-transition-'+ edge_id).show();
+          $('#edit-transition-'+ edge_id).show();
+          // Hide update / cancel
+          $('#update-transition-'+ edge_id).hide();              
+          $('#cancel-transition-'+ edge_id).hide();
+      }
+      return kont;
+  }
+
+  function deletePlace(pid){ 
+      var ajs = { 
+          type : 'DELETE', 
+          url : 'http://{{server_root}}/api/place?pid='+pid, 
+          success : function (data){ 
+              getPlaces(); 
+          }, 
+          error : ajaxError
+      }
+      $.ajax(ajs); 
+  }
+
+  function deletePlaceAction(e){ 
+      e.preventDefault(); 
+      var pid = $('#place-id').val();          
+      var msg = "Do you really want to delete the place: "+pid+"?";
+      $('#delete-place-message').html(msg); 
+      $('#delete-place-dialog').dialog('open'); 
+      $('#delete-place-button').bind('click',function(e){ 
+          e.preventDefault(); 
+          deletePlace(pid); 
+          
+      }); 
+      $('#cancel-delete-place').bind('click',function(e){ 
+          e.preventDefault(); 
+          $('#delete-place-dialog').dialog('close'); 
+      }); 
   }
 
   $(document).ready(function() {
 
       getPlaces();
-      
-      $('#add-button').button();
-      $('#add-button').bind('click',function(e){
+      getTransitions(); 
+
+      $('#add-place').button();
+      $('#add-place').bind('click',function(e){ 
+          place = { 
+              pid : -1, 
+              title : 'New place', 
+              introduction : '',
+              wid : {{world.wid}}
+          }
+
+          storePlace(place,
+                     function(data){ 
+                         var pid = data
+                         var title = place.title;
+                         $('#places-list').append('<li><a href="javascript:loadPlace('+pid +')">'+ pid.toString() +'.</a> <a href="javascript:loadPlace('+ pid +')">'+title+'</a></li>');
+                     }, 
+                     function(x,e){ 
+                         showError('Unable to add place '+x.status+' '+x.responseText);
+                     });
+      }); 
+
+      $('#update-world').button(); 
+      $('#update-world').bind('click',function(e){
+          e.preventDefault();
+          var title = $("#world-name").val();
+          var initial_state = $("#initial-state").val();
+          var wid = {{world.wid}};
+          var ajs = {
+              type : 'POST',
+              data : {title : title,
+                      wid : wid,
+                      initial_state : initial_state},
+              url : 'http://{{server_root}}/api/world',
+              success : function (data){ 
+                  showStatus('Updated World'); 
+              }, 
+              error : ajaxError
+          }          
+          $.ajax(ajs);
+      }); 
+
+      $('#add-transition').button();
+      $('#add-transition').bind('click',function(e){
           // Don't actually submit
           e.preventDefault();
-          transition = uiTransitions();
-          
+          var transition = uiTransition();
+          var ajs = { 
+              type : 'POST', 
+              data : transition, 
+              url : 'http://{{server_root}}/api/transition', 
+              success : function (data){ 
+                  showStatus('Updated Transition'); 
+                  $('#description').html('');
+                  $("#predicate").html('');
+                  $("#effects").html('');
+                  $("#destination").html('');
+                  $("#destination-id").html('');
+                  $('#place-id').html('');
+                  getTransitions();
+              },
+              error : ajaxError
+          }
+          $.ajax(ajs);
       }); 
+      
+      $('#delete-place').button(); 
+      $('#delete-place').bind('click',deletePlaceAction); 
+
+      $('#cancel-delete-place').button(); 
+      $('#delete-place-button').button(); 
+      $('#delete-place-dialog').dialog({title : 'Delete confirmation', 
+                                        autoOpen : false});
 
       $('#submit-button').button();
       $('#submit-button').bind('click',function (e){ 
@@ -157,20 +456,21 @@
           introduction = $('#introduction').val();
           pid = $('#place-id').val();
           
-          place = { pid : pid, 
+          place = { wid : {{world.wid}},
+                    pid : pid, 
                     title : title,
                     introduction : introduction};
           
           storePlace(place);
+          getPlaces()
       }); 
 
-      $('#destination').bind("keydown", function(e) {
+/*      $('#destination').bind("keydown", function(e) {
           var destination = $("#destination").html();
           
-      }); 
+      }); */
 
   });
 
 </script>
-</body>
 </html>

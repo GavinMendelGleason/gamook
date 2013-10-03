@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Worlds</title>
+{{meta | safe}}
+</head>
+
+<body class="page">
+  <div class="world-page">
+    <div id="status" class="ui-corner-all"></div>
+    <h1>Worlds</h1>
+    <ul id="world-list" class="world-list ui-widget-content ui-corner-all">
+    </ul>
+  </div>
+</body> 
+
+<div id="delete-world-dialog">
+  <div><h2 id="delete-world-message"></h2></div>
+  <div class="buttons-div">
+    <span align="right"><button id="delete-world">Delete</button></span><span><button id="cancel-delete-world">Cancel</button></span>
+  </div>
+</div>
+
+<script type="text/javascript">
+   
+  var new_world = '<li class="alert-link"><a href="http://{{server_root}}/new_world">Create a new world</a></li>';
+  
+  function deleteWorld(wid){
+      ajs = { 
+          type : 'DELETE', 
+          url : 'http://{{server_root}}/api/world?wid='+wid,
+          success : function (data) { 
+              getWorlds();
+          }, 
+          error : ajaxError
+      }
+      $.ajax(ajs); 
+  }
+  
+  function deleteWorldAction(wid){ 
+      var kont = function(e){ 
+          e.preventDefault();
+          var msg = "Do you really want to delete the world: "+wid+"?";
+          $('#delete-world-message').html(msg);
+          $('#delete-world-dialog').dialog('open');
+          $('#delete-world').bind('click',function(e){
+              e.preventDefault();
+              deleteWorld(wid);
+          });
+          $('#cancel-delete-world').bind('click',function(e){
+              e.preventDefault();
+              $('#delete-world-dialog').dialog('close');
+          });
+
+      };
+      return kont;
+  }
+
+  function getWorlds(){ 
+      ajs = { 
+          type : 'GET', 
+          url : 'http://{{server_root}}/api/worlds', 
+          dataType: "json", 
+          success : function(worlds){ 
+              $('#world-list').empty();                 
+              for(var i = 0; i < worlds.length ; i++){ 
+                  // initial place in world...
+                  var pid = (worlds[i]).pid;
+                  var wid = (worlds[i]).wid;
+                  var title = (worlds[i]).title;
+                  url = 'http://{{server_root}}/builder?pid='+ pid.toString();
+                  $('#world-list').append('<li><button id="delete-button-'+wid+'">Delete</button><a href="'+url+'">'+ wid +'.</a> <a href="'+url+'">'+title+'</a></li>');
+                  $('#delete-button-'+wid).button();
+                  $('#delete-button-'+wid).bind('click',deleteWorldAction(wid));                                               }
+                  $('#world-list').append(new_world);
+              },
+              error : function(x,e){ 
+                  showError("Unable to load worlds " + x.status + " "+x.responseText);
+              }
+      }
+      $.ajax(ajs);
+  }
+  
+  $(document).ready(function(){
+      
+      getWorlds();
+      $('#delete-world-dialog').dialog({title : 'Delete confirmation', 
+                                        autoOpen : false});       
+      $('#delete-world').button(); 
+      $('#cancel-delete-world').button(); 
+  });
+</script>
+</html>

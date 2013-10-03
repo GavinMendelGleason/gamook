@@ -7,7 +7,7 @@ body
 {
   background-color: #1C94C4;
   font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
-  font-size: 1.1em;
+  font-size: 0.8em;
 }
 
 label, input { display:block; }
@@ -16,9 +16,14 @@ input.text { margin-bottom:12px; width:95%; padding: .4em; }
 
 fieldset { padding:0; border:0; margin-top:25px; }
 
-h1 { font-size: 2.2em; margin: .6em 0; }
+/* h1 { font-size: 1.2em; margin: .6em 0; } */
 
-.world_page {          
+#status { 
+   background-color: #00ff00;
+   width: 100%; 
+}
+
+.world-page {          
     width: 50%;
     margin: 0px auto;
 } 
@@ -50,5 +55,57 @@ h1 { font-size: 2.2em; margin: .6em 0; }
 }
 
 .submit-container button {  
-   float: right;
+   /* alignment: right; */
+}
+
+.alert-link a { 
+   color: #1C94C4;
+   text-decoration: none;
+   font-weight: bold;
+}
+
+.page ul { 
+   list-style-type: none; 
+   padding: 5px 10px 5px 5px;
+}
+
+.page li {  
+   padding: 10px;
+}
+
+.widget-container{ 
+  margin: 10px;
+}
+
+.widget {  
+  padding: 5px;
+  background-color: #dddddd;  /* #dddddd;*/
+}
+
+.widget-header{
+  font-size: 1.5em;
+  padding: 5px;
+  color: #cccccc;
+}
+
+label {  
+  display: block;
+}
+
+.entry-form{  
+  margin: 5px;
+}
+
+.entry{ 
+  vertical-align: top;
+}
+
+.transition-row td { 
+  background-color: #cccccc; 
+  vertical-align: top;
+}
+
+.world-list a { 
+  font-size: 1.5em;            
+  margin: 5px 0px 2px 15px;
 }

@@ -14,7 +14,7 @@
     <form>
       <fieldset>
         <div>
-          <label for="world_text">World Name</label>
+          <label for="world_name">World Name</label>
           <input id="world_name" name="world_name" class="text ui-widget-content ui-corner-all" />
         </div>
         <div>
@@ -28,7 +28,6 @@
   </div>
 </body> 
 
-</html>
 <script type="text/javascript">
 $(document).ready(function (){
     function showError(s){ 
@@ -44,7 +43,7 @@ $(document).ready(function (){
         }else{        
             ajs = { 
                 type : 'POST',
-                url : 'http://{{server_root}}/builder',
+                url : 'http://{{server_root}}/api/create-world',
                 data : { world_name : $('#world_name').val(),
                          initial_state : $('#initial_state').val() }, 
                 dataType: "json",
@@ -61,3 +60,4 @@ $(document).ready(function (){
     }); 
 });
 </script>
+</html>
